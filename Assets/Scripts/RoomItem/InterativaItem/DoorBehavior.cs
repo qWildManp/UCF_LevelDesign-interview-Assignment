@@ -9,13 +9,12 @@ public class DoorBehavior : MonoBehaviour
     [SerializeField] private bool islocked;
     [SerializeField] private string unlockRequirement;
     [SerializeField] private float countDown;
+    [SerializeField] AudioClip[] audioClips;
     private GameObject player;
     private Animator animator;
     private float currentCountDown;
     private bool playerEnter;
     private bool previousPlayerOpen;
-    private bool showFindKeyGameObjective;
-    private bool showSolvePuzzleObjective;
     // Start is called before the first frame update
     void Awake()
     {
@@ -23,8 +22,6 @@ public class DoorBehavior : MonoBehaviour
         currentCountDown = countDown;
         animator = GetComponent<Animator>();
         playerEnter = false;
-        showFindKeyGameObjective = false ;
-        showSolvePuzzleObjective = false ;
         UI = GameObject.Find("Canvas");
     }
     private void Update()
@@ -56,16 +53,6 @@ public class DoorBehavior : MonoBehaviour
                 {
 
                     UI.GetComponent<MsgDisplayer>().SetMessage("The door is locked, I need " + unlockRequirement);
-                    if (unlockRequirement == "LUNA KEY" && !showFindKeyGameObjective)
-                    {
-                        UI.GetComponent<MsgDisplayer>().SetSecondObjective("Find the LUNA KEY");
-                        showFindKeyGameObjective = true;
-                    }
-                    else if(unlockRequirement == "SOLVE THE PUZZLE" && !showSolvePuzzleObjective)
-                    {
-                        UI.GetComponent<MsgDisplayer>().SetSecondObjective("Solve the room puzzle");
-                        showSolvePuzzleObjective = true;
-                    }
                 }
             }
             else
@@ -77,7 +64,7 @@ public class DoorBehavior : MonoBehaviour
                     {
                         if (animator.GetBool("DoorOpen"))// if the door is currently open
                         {
-                            animator.SetBool("DoorOpen", false);
+                            ChangeDoorStatus();
                         }
                         currentCountDown = countDown;
                         previousPlayerOpen = false;
@@ -91,7 +78,6 @@ public class DoorBehavior : MonoBehaviour
             if (playerEnter && Input.GetKeyDown(KeyCode.E))
                 UI.GetComponent<MsgDisplayer>().SetMessage("I cannot open it!");
         }
-        
     }
     public void SetDoorOpenable(bool result)
     {
@@ -140,6 +126,27 @@ public class DoorBehavior : MonoBehaviour
     public void ChangeDoorStatus()
     {
         animator.SetBool("DoorOpen", !animator.GetBool("DoorOpen"));
+        if (animator.GetBool("DoorOpen"))
+        {
+            GetComponent<AudioSource>().clip = audioClips[0];
+        }
+        else
+        {
+            GetComponent<AudioSource>().clip = audioClips[1];
+        }
+        GetComponent<AudioSource>().Play();
     }
     // Update is called once per frame
+    public void playSound()
+    {
+        if (animator.GetBool("DoorOpen"))
+        {
+            GetComponent<AudioSource>().clip = audioClips[0];
+        }
+        else
+        {
+            GetComponent<AudioSource>().clip = audioClips[1];
+        }
+        GetComponent<AudioSource>().Play();
+    }
 }
