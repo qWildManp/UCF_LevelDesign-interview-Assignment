@@ -15,7 +15,7 @@ public class FootSteps : MonoBehaviour
     void Update()
     {
         Vector3 horizontalVelocity = new Vector3(cc.velocity.x, 0, cc.velocity.z);
-        if (cc.isGrounded == true && horizontalVelocity.magnitude > 60f && GetComponent<AudioSource>().isPlaying == false)
+        if (cc.isGrounded == true && horizontalVelocity.magnitude > 6f && GetComponent<AudioSource>().isPlaying == false)
         {
             Debug.Log("velocity: " + cc.velocity.magnitude);
             GetComponent<AudioSource>().volume = Random.Range(0.3f, 0.4f);
