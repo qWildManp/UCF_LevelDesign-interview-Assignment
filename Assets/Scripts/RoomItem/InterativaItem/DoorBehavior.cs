@@ -149,4 +149,9 @@ public class DoorBehavior : MonoBehaviour
         }
         GetComponent<AudioSource>().Play();
     }
+
+    public void PuzzleSolvedDoor()
+    {
+        animator.SetBool("DoorOpen", true);
+    }
 }

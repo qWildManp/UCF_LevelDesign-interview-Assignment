@@ -6,7 +6,6 @@ public class PlayerRayCast : MonoBehaviour
 {
     // Start is called before the first frame update
     [SerializeField] Transform playerCamera;
-    [SerializeField] Transform flashLight;
     Ray ray;
     void Start()
     {

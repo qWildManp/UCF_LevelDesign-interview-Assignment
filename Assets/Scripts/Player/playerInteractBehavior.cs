@@ -4,46 +4,74 @@ using UnityEngine;
 
 public class playerInteractBehavior : MonoBehaviour
 {
-    private PlayerInventary inventary;
-    private Transform flashLight;
     // Start is called before the first frame update
+    public bool playerHasGun;
+    public GameObject bullet;
+    public GameObject gunPartical;
+    public bool bullectGenerated;
+    public float bulletSpeed;
+    public float currentTime;
+    public float coolDown;
     void Start()
     {
-        if(GameObject.Find("PlayerInventary"))
-            inventary = GameObject.Find("PlayerInventary").GetComponent<PlayerInventary>();
-        flashLight = transform.GetChild(2).GetChild(0).GetChild(0);
-        flashLight.gameObject.SetActive(false);
     }
 
     // Update is called once per frame
     void Update()
     {
-        Ray ray = GetComponent<PlayerRayCast>().GetPlayerRay();
+        Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
         RaycastHit hit;
-        if (inventary && inventary.CheckItem("FLASH LIGHT")!= null)// if player has flash light,activate the flash light 
-        {
-            flashLight.gameObject.SetActive(true);
-            flashLight.gameObject.GetComponent<FlashLightBehavior>().inPlayerHand = true;
-        }
-        if (Input.GetKeyDown(KeyCode.B))//Show player Inventary
-        {
-            inventary.ChangePlayerInventaryDisplay();
-        }
-        //if(Input.GetKeyDown(KeyCode.P))//Show player Progess
         LayerMask layerMask = ~(1 << 9);
-        if (Physics.Raycast(ray,out hit, 200,layerMask))//player pick item
+        if (Physics.Raycast(ray,out hit, 1000,layerMask))//player pick item
         {
             GameObject obj = hit.collider.gameObject;
-            RoomItem item = obj.GetComponent<RoomItem>();
-            if (item)
+            if (obj.GetComponent<RoomItem>())
             {
+                RoomItem item = obj.GetComponent<RoomItem>();
                 item.SetChecked(true);
                 if (Input.GetKeyDown(KeyCode.E))
                 {
-                    inventary.AddItem(obj);
+                    playerHasGun = true;
                     Destroy(obj);
                 }
             }
+            if (obj.GetComponent<PuzzleButton>())
+            {
+                PuzzleButton btn = obj.GetComponent<PuzzleButton>();
+                Debug.Log("Hit puzzle btn");
+                if (Input.GetKeyDown(KeyCode.E))
+                {
+                    btn.PressButton();
+                }
+            }
+
+        }
+        if (Physics.Raycast(ray, out hit, 10000, layerMask))//player shoot
+        {
+                GameObject obj = hit.collider.gameObject;
+                if (Input.GetMouseButtonDown(0)&&playerHasGun)
+                {
+                if(!bullectGenerated){
+                    GameObject bullectInstance = Instantiate(bullet);
+                    bullectGenerated = true;
+                    bullectInstance.transform.position = gunPartical.transform.position;
+                    StartCoroutine(BulletMovement(bullectInstance,hit.point));
+                }
+                Debug.Log("Hit" + obj);
+                }        
+        }
+    }
+    protected IEnumerator BulletMovement(GameObject bullet,Vector3 end)
+    {
+
+        float sqrRemainDistance = (bullet.transform.position - end).sqrMagnitude;
+        Rigidbody rb = bullet.GetComponent<Rigidbody>();
+        while (sqrRemainDistance > float.Epsilon)
+        {
+            Vector3 newPosition = Vector3.MoveTowards(rb.position, end, bulletSpeed * Time.deltaTime);
+            rb.MovePosition(newPosition);
+            sqrRemainDistance = (bullet.transform.position - end).sqrMagnitude;
+            yield return null;
         }
     }
 }
